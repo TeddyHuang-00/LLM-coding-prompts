@@ -7,7 +7,7 @@ A modern deep learning project template built with PyTorch Lightning, featuring 
 - **PyTorch Lightning**: Simplified training loop with built-in best practices
 - **Multiple Model Architectures**: CNN, Transformer, and Hybrid models
 - **Type-Safe Configuration**: Pydantic-based configuration with CLI support
-- **Modern Python**: Python 3.11+ with type hints and modern tooling
+- **Modern Python**: Python 3.12+ with type hints and modern tooling
 - **Testing**: Comprehensive test suite with pytest
 - **Code Quality**: Pre-commit hooks, ruff linting, and mypy type checking
 - **Visualization**: Training plots and model analysis utilities
