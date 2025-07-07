@@ -47,8 +47,12 @@ select = [
 ]
 
 ignore = [
-    "E501", # Line length (handled by formatter)
-    "D",    # Skip docstring rules for minimal example
+    "E501",    # Line length (handled by formatter)
+    "D",       # Skip docstring rules for minimal example
+    "PT011",   # Too strict error type
+    "PLR2004", # Magic number in comparison
+    "PLR0913", # Too many arguments in function
+    "N812",    # Import as name should be lowercase
 ]
 
 fixable = ["ALL"]
@@ -56,11 +60,13 @@ unfixable = []
 
 [lint.per-file-ignores]
 "__init__.py" = ["F401"]
-"tests/*" = ["S101", "ARG", "PLR2004"]
+"src/*" = ["PT019"]
+"tests/*" = ["S101", "ARG"]
 
 [lint.isort]
-combine-as-imports = true
+known-first-party = ["src"]
 required-imports = ["from __future__ import annotations"]
+combine-as-imports = true
 
 [lint.flake8-quotes]
 docstring-quotes = "double"
