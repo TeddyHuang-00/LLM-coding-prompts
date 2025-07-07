@@ -1,0 +1,36 @@
+# GitHub Copilot Instructions for Rust Project
+
+- Use Rust 2021 edition with modern syntax and idioms
+- Use cargo fmt for formatting and cargo clippy for linting with zero warnings
+- Use thiserror for library error types and anyhow for application error handling
+- Use modern control flow: if let chains, let-else patterns, match expressions
+- Use async/await for I/O operations with tokio runtime
+- Use serde for serialization with derive macros
+- Use tracing for structured logging instead of println! in production code
+- Use clap with derive API for command-line argument parsing
+- Use Result<T, E> for error handling, avoid unwrap() in production code
+- Use iterators and functional programming patterns where appropriate
+- Use generic types and traits for code reuse and flexibility
+- Use lifetime annotations only when necessary, prefer owned types
+- Use Vec<T> instead of arrays for dynamic collections
+- Use HashMap and BTreeMap for key-value storage
+- Use String for owned strings, &str for borrowed strings
+- Use PathBuf for owned paths, &Path for borrowed paths
+- Use proper error propagation with ? operator
+- Use #[derive(Debug, Clone, PartialEq)] for common traits
+- Use documentation comments /// for public APIs
+- Use #[cfg(test)] modules for unit tests
+- Use assert! and assert_eq! for test assertions
+- Use criterion for benchmarking performance-critical code
+- Use workspace structure for multi-crate projects
+- Use feature flags for optional functionality
+- Use semantic versioning for crate releases
+- Run cargo fmt before committing code
+- Run cargo clippy --all-targets --all-features -- -D warnings before committing
+- Run cargo test to verify all tests pass
+- Use descriptive variable names and avoid abbreviations
+- Use snake_case for variables and functions, PascalCase for types
+- Use SCREAMING_SNAKE_CASE for constants
+- Use modules for code organization and encapsulation
+- Use pub(crate) for internal APIs that need cross-module access
+- Use type aliases for complex types to improve readability
