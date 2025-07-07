@@ -1,16 +1,10 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
-name = "my-python-project"
+name = "{{PROJECT_NAME}}"
 description = "A modern Python project"
 version = "0.1.0"
-authors = [
-    {name = "Your Name", email = "your.email@example.com"},
-]
+authors = [{ name = "{{AUTHOR_NAME}}", email = "{{AUTHOR_EMAIL}}" }]
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -20,25 +14,18 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-dependencies = [
-    "pydantic-settings>=2.0.0",
-]
+dependencies = ["pydantic-settings>=2.0.0"]
 
 [project.optional-dependencies]
-dev = [
-    "ruff>=0.6.0",
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "mypy>=1.0.0",
-]
+dev = ["ruff>=0.6.0", "pytest>=7.0.0", "pytest-cov>=4.0.0", "mypy>=1.0.0"]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/my-python-project"
-Repository = "https://github.com/yourusername/my-python-project"
-Issues = "https://github.com/yourusername/my-python-project/issues"
+Homepage = "https://github.com/yourusername/{{PROJECT_NAME}}"
+Repository = "https://github.com/yourusername/{{PROJECT_NAME}}"
+Issues = "https://github.com/yourusername/{{PROJECT_NAME}}/issues"
 
 [project.scripts]
-my-python-project = "src.main:main"
+test = "src.main:main"
 
 [tool.ruff]
 line-length = 88
@@ -48,45 +35,52 @@ preview = true
 
 include = ["*.py", "*.pyi"]
 exclude = [
-    ".git", ".venv", "__pycache__", "build", "dist",
-    ".pytest_cache", ".mypy_cache", ".ruff_cache"
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
 ]
 
 src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = [
-    "E", "W",    # pycodestyle errors and warnings
-    "F",         # Pyflakes
-    "I",         # isort
-    "N",         # pep8-naming
-    "UP",        # pyupgrade
-    "ANN",       # flake8-annotations
-    "B",         # flake8-bugbear
-    "A",         # flake8-builtins
-    "C4",        # flake8-comprehensions
-    "DTZ",       # flake8-datetimez
-    "EM",        # flake8-errmsg
-    "FA",        # flake8-future-annotations
-    "G",         # flake8-logging-format
-    "PIE",       # flake8-pie
-    "PT",        # flake8-pytest-style
-    "Q",         # flake8-quotes
-    "RET",       # flake8-return
-    "SIM",       # flake8-simplify
-    "ARG",       # flake8-unused-arguments
-    "PTH",       # flake8-use-pathlib
-    "PERF",      # Perflint
-    "FURB",      # refurb
-    "RUF",       # Ruff-specific rules
-    "PL",        # Pylint
+    "E",
+    "W",    # pycodestyle errors and warnings
+    "F",    # Pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "ANN",  # flake8-annotations
+    "B",    # flake8-bugbear
+    "A",    # flake8-builtins
+    "C4",   # flake8-comprehensions
+    "DTZ",  # flake8-datetimez
+    "EM",   # flake8-errmsg
+    "FA",   # flake8-future-annotations
+    "G",    # flake8-logging-format
+    "PIE",  # flake8-pie
+    "PT",   # flake8-pytest-style
+    "Q",    # flake8-quotes
+    "RET",  # flake8-return
+    "SIM",  # flake8-simplify
+    "ARG",  # flake8-unused-arguments
+    "PTH",  # flake8-use-pathlib
+    "PERF", # Perflint
+    "FURB", # refurb
+    "RUF",  # Ruff-specific rules
+    "PL",   # Pylint
 ]
 
 ignore = [
-    "E501",      # Line length (handled by formatter)
-    "D",         # Skip docstring rules for minimal example
-    "ANN101",    # Missing type annotation for self
-    "ANN102",    # Missing type annotation for cls
+    "E501",   # Line length (handled by formatter)
+    "D",      # Skip docstring rules for minimal example
+    "ANN101", # Missing type annotation for self
+    "ANN102", # Missing type annotation for cls
 ]
 
 fixable = ["ALL"]

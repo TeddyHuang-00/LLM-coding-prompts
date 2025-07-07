@@ -1,30 +1,17 @@
-# My Rust Project
+# {{PROJECT_NAME}}
 
 A modern Rust project template with best practices and comprehensive tooling.
 
-## Features
-
-- **Modern Rust**: Uses Rust 2021 edition with latest stable features
-- **Comprehensive Tooling**: Clippy linting, rustfmt formatting, and testing
-- **Async Support**: Tokio for async/await programming
-- **Error Handling**: anyhow for application error handling
-- **CLI Support**: clap for command-line argument parsing
-- **Serialization**: serde for JSON/YAML/TOML support
-- **Logging**: tracing for structured logging
-- **Benchmarking**: criterion for performance testing
-
 ## Setup
 
-1. **Install Rust**:
+1. **Install Rust using rustup**:
    ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   source ~/.cargo/env
+   rustup show # Should show the active toolchain
    ```
-
 2. **Clone and build**:
    ```bash
    git clone <repository-url>
-   cd my-rust-project
+   cd {{PROJECT_NAME}}
    cargo build
    ```
 
@@ -58,6 +45,7 @@ cargo bench
 ### Quality Assurance
 
 Before committing, always run:
+
 ```bash
 # Format code
 cargo fmt
@@ -75,7 +63,7 @@ cargo check --all-targets --all-features
 ## Project Structure
 
 ```
-my-rust-project/
+{{PROJECT_NAME}}/
 ├── src/
 │   └── main.rs         # Main entry point
 ├── tests/              # Integration tests

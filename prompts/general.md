@@ -1,9 +1,3 @@
----
-description: General Guidelines
-globs:
-alwaysApply: true
----
-
 # Assistant Rules
 
 **Your fundamental responsibility:** Remember you are a senior engineer and have a

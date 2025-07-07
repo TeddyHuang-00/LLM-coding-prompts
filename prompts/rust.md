@@ -7,6 +7,7 @@ These are comprehensive rules for modern Rust development using contemporary too
 Target Rust Edition 2024+ with the latest stable compiler. Write code that leverages modern Rust features and idioms appropriate for Edition 2024.
 
 Always use modern Rust practices including:
+
 - Advanced type system features (GATs, async traits, etc.)
 - Modern control flow constructs (if let chains, let-else)
 - Contemporary error handling patterns
@@ -123,10 +124,10 @@ use thiserror::Error;
 pub enum DataStoreError {
     #[error("Connection failed")]
     ConnectionError(#[from] std::io::Error),
-    
+
     #[error("Record not found: {0}")]
     NotFound(String),
-    
+
     #[error("Invalid data format")]
     InvalidFormat(#[from] serde_json::Error),
 }
@@ -140,10 +141,10 @@ use anyhow::{Context, Result};
 fn load_config() -> Result<Config> {
     let content = std::fs::read_to_string("config.toml")
         .context("Failed to read configuration file")?;
-    
+
     let config: Config = toml::from_str(&content)
         .context("Failed to parse configuration")?;
-    
+
     Ok(config)
 }
 ```
@@ -190,7 +191,7 @@ trait AsyncIterator {
     type Future<'a>: std::future::Future<Output = Option<Self::Item>>
     where
         Self: 'a;
-    
+
     fn next(&mut self) -> Self::Future<'_>;
 }
 ```
@@ -218,7 +219,7 @@ pub struct User {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_user_creation() {
         let user = User::new("Alice", "alice@example.com");
@@ -232,21 +233,21 @@ mod tests {
 
 **Documentation Tests**: Write runnable examples in doc comments:
 
-```rust
+````rust
 /// Validates an email address format.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use mylib::validate_email;
-/// 
+///
 /// assert!(validate_email("user@example.com").is_ok());
 /// assert!(validate_email("invalid-email").is_err());
 /// ```
 pub fn validate_email(email: &str) -> Result<(), ValidationError> {
     // Implementation
 }
-```
+````
 
 ### Advanced Testing
 
@@ -260,47 +261,48 @@ For complex or critical code, use:
 
 ### Documentation Comments
 
-```rust
+````rust
 /// A high-level summary of what this function does.
-/// 
+///
 /// More detailed explanation of the behavior, including any important
 /// implementation details or usage considerations.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `path` - The file path to process
 /// * `options` - Configuration options for processing
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns the processed data as a `String`, or an error if processing fails.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use mylib::process_file;
-/// 
+///
 /// let result = process_file("data.txt", &Default::default())?;
 /// assert!(!result.is_empty());
 /// ```
-/// 
+///
 /// # Errors
-/// 
+///
 /// This function will return an error if:
 /// - The file cannot be read
 /// - The file contains invalid data
-/// 
+///
 /// # Panics
-/// 
+///
 /// This function panics if the path contains null bytes.
 pub fn process_file(path: &Path, options: &ProcessOptions) -> Result<String, ProcessError> {
     // Implementation
 }
-```
+````
 
 ### Documentation Sections
 
 Use standard sections when applicable:
+
 - `# Examples` (mandatory for most public APIs)
 - `# Errors` (for fallible functions)
 - `# Panics` (if the function can panic)
@@ -330,7 +332,7 @@ When unsafe code is necessary:
 
 ```rust
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences a raw pointer.
 /// The caller must ensure that:
 /// - `ptr` is valid and properly aligned
@@ -353,7 +355,7 @@ use std::process::Command;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let task = std::env::args().nth(1);
-    
+
     match task.as_deref() {
         Some("lint") => {
             run_command("cargo", &["fmt", "--check"])?;
@@ -371,7 +373,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             std::process::exit(1);
         }
     }
-    
+
     Ok(())
 }
 
@@ -443,10 +445,10 @@ async = ["dep:tokio"]
 fn process_data(data: &str) -> Result<ProcessedData, ProcessError> {
     let parsed = parse_data(data)
         .map_err(|e| ProcessError::ParseError(e.to_string()))?;
-    
+
     validate_data(&parsed)
         .map_err(|e| ProcessError::ValidationError(e.to_string()))?;
-    
+
     Ok(transform_data(parsed))
 }
 
@@ -465,13 +467,13 @@ fn bad_process_data(data: &str) -> ProcessedData {
 // PREFER: Minimize allocations
 fn process_lines(input: &str) -> Vec<String> {
     let mut results = Vec::with_capacity(input.lines().count());
-    
+
     for line in input.lines() {
         if !line.is_empty() {
             results.push(line.trim().to_string());
         }
     }
-    
+
     results
 }
 
@@ -487,7 +489,7 @@ fn find_valid_entries(data: &[Entry]) -> impl Iterator<Item = &Entry> {
 // PREFER: Structured concurrency
 async fn process_multiple_urls(urls: &[&str]) -> Result<Vec<String>, reqwest::Error> {
     let futures = urls.iter().map(|url| fetch_url(url));
-    
+
     let results = futures::future::try_join_all(futures).await?;
     Ok(results)
 }
@@ -495,7 +497,7 @@ async fn process_multiple_urls(urls: &[&str]) -> Result<Vec<String>, reqwest::Er
 // PREFER: Proper error handling in async code
 async fn fetch_with_retry(url: &str, max_retries: u32) -> Result<String, NetworkError> {
     let mut attempts = 0;
-    
+
     loop {
         match fetch_url(url).await {
             Ok(data) => return Ok(data),
@@ -561,7 +563,7 @@ use std::path::Path;
 
 fn safe_file_operation(path: &str) -> Result<String, std::io::Error> {
     let path = Path::new(path);
-    
+
     // Validate path to prevent directory traversal
     if path.components().any(|component| matches!(component, std::path::Component::ParentDir)) {
         return Err(std::io::Error::new(
@@ -569,7 +571,7 @@ fn safe_file_operation(path: &str) -> Result<String, std::io::Error> {
             "Path contains parent directory references"
         ));
     }
-    
+
     std::fs::read_to_string(path)
 }
 ```

@@ -1,4 +1,4 @@
-# My Python Project
+# {{PROJECT_NAME}}
 
 A modern Python project template with comprehensive tooling and best practices.
 
@@ -13,20 +13,13 @@ A modern Python project template with comprehensive tooling and best practices.
 
 ## Setup
 
-1. **Install Python 3.11+**:
+1. **Install UV**:
    ```bash
-   python --version  # Should be 3.11+
+   uv --version  # Should be 0.7+
    ```
-
-2. **Create and activate virtual environment**:
+2. **Install dependencies**:
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-3. **Install dependencies**:
-   ```bash
-   pip install -e ".[dev]"
+   uv sync
    ```
 
 ## Development
@@ -34,6 +27,7 @@ A modern Python project template with comprehensive tooling and best practices.
 ### Code Quality
 
 Run all quality checks:
+
 ```bash
 # Format code
 ruff format
@@ -54,8 +48,8 @@ ruff format && ruff check && mypy src/ && pytest
 ### Project Structure
 
 ```
-my-python-project/
-├── src/                 # Source code
+{{PROJECT_NAME}}/
+├── src/                # Source code
 │   └── main.py         # Main entry point
 ├── tests/              # Test files
 ├── pyproject.toml      # Project configuration
@@ -75,13 +69,9 @@ The project uses `pyproject.toml` for all tool configuration:
 ## Usage
 
 Run the application:
-```bash
-python -m src.main
-```
 
-Or use the installed script:
 ```bash
-my-python-project
+uv run src/main.py
 ```
 
 ## Dependencies
