@@ -1,0 +1,28 @@
+# Configuration for cargo-deny
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-DFS-2016",
+]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+deny = [
+    { name = "openssl", version = "*" },  # Use rustls instead
+]
+
+[advisories]
+vulnerability = "deny"
+unmaintained = "warn"
+unsound = "warn"
+yanked = "warn"
+
+[sources]
+unknown-registry = "warn"
+unknown-git = "warn"

@@ -32,7 +32,6 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "mypy>=1.0.0",
-    "pre-commit>=3.0.0",
 ]
 vision = ["torchvision>=0.15.0", "Pillow>=10.0.0"]
 nlp = ["transformers>=4.30.0", "tokenizers>=0.13.0"]
@@ -52,76 +51,3 @@ Issues = "https://github.com/{{GITHUB_NAME}}/{{PROJECT_NAME}}/issues"
 [project.scripts]
 train = "src.train:main"
 evaluate = "src.evaluate:main"
-
-[tool.mypy]
-python_version = "3.12"
-strict = true
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-disallow_untyped_decorators = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
-strict_equality = true
-no_implicit_optional = true
-
-# ML-specific ignores
-[[tool.mypy.overrides]]
-module = [
-    "torch.*",
-    "lightning.*",
-    "sklearn.*",
-    "matplotlib.*",
-    "seaborn.*",
-    "polars.*",
-    "transformers.*",
-    "tokenizers.*",
-]
-ignore_missing_imports = true
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-addopts = [
-    "--strict-markers",
-    "--strict-config",
-    "--cov=src",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-report=xml",
-    "--tb=short",
-]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-    "unit: marks tests as unit tests",
-]
-
-[tool.coverage.run]
-source = ["src"]
-branch = true
-omit = [
-    "tests/*",
-    "src/config.py", # Config files often have many branches
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
-    "\\.\\.\\.",                  # Ellipsis for type stubs
-]

@@ -3,10 +3,29 @@ members = ["apps/*", "libs/*", "xtask"]
 resolver = "2"
 
 [workspace.dependencies]
-# External dependencies
+# Error handling (required)
 anyhow = "1.0"
 thiserror = "1.0"
+
+# CLI
 clap = { version = "4.0", features = ["derive"] }
+
+# Async
+tokio = { version = "1.0", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Logging (required)
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# Security (for sensitive data)
+secrecy = "0.8"
+
+# Testing
+tokio-test = "0.4"
 
 # Internal dependencies
 "{{PROJECT_NAME}}_core" = { path = "libs/{{PROJECT_NAME}}_core" }
@@ -20,12 +39,3 @@ rustdoc-args = ["--cfg", "docsrs"]
 unsafe_code = "forbid"
 missing_docs = "warn"
 
-[workspace.lints.clippy]
-all = "warn"
-pedantic = "warn"
-nursery = "warn"
-cargo = "warn"
-# Allow some pedantic lints that are too strict
-module_name_repetitions = "allow"
-missing_errors_doc = "allow"
-missing_panics_doc = "allow"
