@@ -230,6 +230,14 @@ function copy_template
     cp -r "$template_path" "$PROJECT_PATH"
     success "Template files copied"
 
+    # Rename directories with template variables (process deepest first)
+    for dir in (find "$PROJECT_PATH" -type d -name "*{{PROJECT_NAME}}*" | sort -r)
+        set new_name (string replace "{{PROJECT_NAME}}" "$PROJECT_NAME" "$dir")
+        if test "$dir" != "$new_name"
+            mv "$dir" "$new_name"
+        end
+    end
+
     # Update template placeholders using sed
     for file in (find "$PROJECT_PATH" -type f -not -name ".gitignore")
         if test -f "$file"

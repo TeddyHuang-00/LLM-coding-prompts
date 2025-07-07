@@ -1,0 +1,37 @@
+# Rust
+target/
+Cargo.lock  # Remove this line if this is a library
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Runtime
+*.orig
+*.rej
+
+# Temporary files
+*~
+.#*
+#*#
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.tmp

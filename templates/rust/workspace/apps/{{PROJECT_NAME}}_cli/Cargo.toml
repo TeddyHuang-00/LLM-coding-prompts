@@ -1,0 +1,20 @@
+[package]
+name = "{{PROJECT_NAME}}_cli"
+version = "0.1.0"
+edition = "2024"
+authors = ["{{AUTHOR_NAME}} <{{AUTHOR_EMAIL}}>"]
+description = "Command-line interface for {{PROJECT_NAME}}"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/{{GITHUB_NAME}}/{{PROJECT_NAME}}"
+readme = "README.md"
+
+[[bin]]
+name = "{{PROJECT_NAME}}"
+path = "src/main.rs"
+
+[dependencies]
+# Workspace dependencies
+anyhow = { workspace = true }
+clap = { workspace = true }
+"{{PROJECT_NAME}}_core" = { workspace = true }
+"{{PROJECT_NAME}}_utils" = { workspace = true }

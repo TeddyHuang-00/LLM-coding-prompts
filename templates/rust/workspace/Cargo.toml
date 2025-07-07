@@ -1,0 +1,31 @@
+[workspace]
+members = ["apps/*", "libs/*", "xtask"]
+resolver = "2"
+
+[workspace.dependencies]
+# External dependencies
+anyhow = "1.0"
+thiserror = "1.0"
+clap = { version = "4.0", features = ["derive"] }
+
+# Internal dependencies
+"{{PROJECT_NAME}}_core" = { path = "libs/{{PROJECT_NAME}}_core" }
+"{{PROJECT_NAME}}_utils" = { path = "libs/{{PROJECT_NAME}}_utils" }
+
+[workspace.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = "warn"
+pedantic = "warn"
+nursery = "warn"
+cargo = "warn"
+# Allow some pedantic lints that are too strict
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
