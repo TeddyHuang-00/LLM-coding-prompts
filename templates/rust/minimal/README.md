@@ -10,7 +10,7 @@ A modern Rust project template with best practices and comprehensive tooling.
    ```
 2. **Clone and build**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/{{GITHUB_NAME}}/{{PROJECT_NAME}}.git
    cd {{PROJECT_NAME}}
    cargo build
    ```

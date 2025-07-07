@@ -20,7 +20,7 @@ set PROJECT_PATH
 set VCS_NAME
 set AUTHOR_NAME
 set AUTHOR_EMAIL
-set GITHUB_NAME your-github-username
+set GITHUB_NAME
 set AI_PROVIDERS
 
 function banner
@@ -147,6 +147,16 @@ function select_ai_providers
     end
 end
 
+function get_github_info
+    set GITHUB_NAME (gum input --placeholder "Enter your GitHub username" --prompt "GitHub username: ")
+    if test -z "$GITHUB_NAME"
+        error "GitHub username is required"
+        exit 1
+    end
+
+    info "GitHub username: $GITHUB_NAME"
+end
+
 function get_vcs_info
     set vcs_options "Git:git" "Jujutsu:jj"
     set VCS_NAME (gum choose $vcs_options --header "Select version control system (VCS):" --label-delimiter ":")
@@ -226,6 +236,7 @@ function copy_template
             sed -i.bak "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$file"
             sed -i.bak "s/{{AUTHOR_NAME}}/$AUTHOR_NAME/g" "$file"
             sed -i.bak "s/{{AUTHOR_EMAIL}}/$AUTHOR_EMAIL/g" "$file"
+            sed -i.bak "s/{{GITHUB_NAME}}/$GITHUB_NAME/g" "$file"
             rm "$file.bak"
         end
     end
@@ -369,6 +380,7 @@ function main
 
     get_project_info
     get_vcs_info
+    get_github_info
     select_ai_providers
 
     # Confirm setup
