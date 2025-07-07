@@ -18,8 +18,8 @@ set TEMPLATE
 set PROJECT_NAME
 set PROJECT_PATH
 set VCS_NAME
-set AUTHOR_NAME "Your Name"
-set AUTHOR_EMAIL "your.email@example.com"
+set AUTHOR_NAME
+set AUTHOR_EMAIL
 set GITHUB_NAME your-github-username
 set AI_PROVIDERS
 
@@ -148,41 +148,60 @@ function select_ai_providers
 end
 
 function get_vcs_info
-    set vcs_options "Git:git" "Jujutsu:jj" "None:"
+    set vcs_options "Git:git" "Jujutsu:jj"
     set VCS_NAME (gum choose $vcs_options --header "Select version control system (VCS):" --label-delimiter ":")
 
-    if test -z "$VCS_NAME"
-        warning "No VCS selected, proceeding without version control"
-    else if not type -q "$VCS_NAME"
+    if not type -q "$VCS_NAME"
         error "'$VCS_NAME' is not installed or recognized. Please install it or choose another VCS."
         exit 1
-    else
-        set config_name
-        set config_email
-        if test "$VCS_NAME" = git
-            set config_name (git config user.name 2>/dev/null; or echo "")
-            set config_email (git config user.email 2>/dev/null; or echo "")
-        else if test "$VCS_NAME" = jj
-            set config_name (jj config g user.name 2>/dev/null; or echo "")
-            set config_email (jj config g user.email 2>/dev/null; or echo "")
-        else
-            error "Unsupported VCS: $VCS_NAME"
+    end
+
+    switch $VCS_NAME
+        case git
+            set AUTHOR_NAME (git config --global user.name 2>/dev/null; or echo "")
+            set AUTHOR_EMAIL (git config --global user.email 2>/dev/null; or echo "")
+        case jj
+            set AUTHOR_NAME (jj config g user.name 2>/dev/null; or echo "")
+            set AUTHOR_EMAIL (jj config g user.email 2>/dev/null; or echo "")
+    end
+
+    if test -z "$AUTHOR_NAME"
+        warning "No author name configured for $VCS_NAME. Please set it now."
+        set AUTHOR_NAME (gum input --placeholder "Enter your name" --prompt "Author name: ")
+        if test -z "$AUTHOR_NAME"
+            error "Author name is required"
             exit 1
         end
 
-        set AUTHOR_NAME (gum input --placeholder "Enter your name" --prompt "Author name: " --value "$config_name")
-        if test -z "$AUTHOR_NAME"
-            set AUTHOR_NAME "Your Name"
+        switch $VCS_NAME
+            case git
+                git config --global user.name "$AUTHOR_NAME"
+            case jj
+                jj config s --user user.name "$AUTHOR_NAME"
         end
-
-        set AUTHOR_EMAIL (gum input --placeholder "Enter your email" --prompt "Author email: " --value "$config_email")
-        if test -z "$AUTHOR_EMAIL"
-            set AUTHOR_EMAIL "your.email@example.com"
-        end
-
-        info "VCS: $VCS_NAME"
-        info "Author: $AUTHOR_NAME <$AUTHOR_EMAIL>"
     end
+
+    if test -z "$AUTHOR_EMAIL"
+        warning "No author email configured for $VCS_NAME. Please set it now."
+        set AUTHOR_EMAIL (gum input --placeholder "Enter your email" --prompt "Author email: ")
+        if test -z "$AUTHOR_EMAIL"
+            error "Author email is required"
+            exit 1
+        else if not string match -qr '^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})*$' "$AUTHOR_EMAIL"
+            error "Invalid email format: $AUTHOR_EMAIL"
+            exit 1
+        end
+
+        switch $VCS_NAME
+            case git
+                git config --global user.email "$AUTHOR_EMAIL"
+            case jj
+                jj config s --user user.email "$AUTHOR_EMAIL"
+        end
+    end
+
+    info "VCS: $VCS_NAME"
+    info "Author: $AUTHOR_NAME <$AUTHOR_EMAIL>"
 end
 
 function copy_template
@@ -202,7 +221,7 @@ function copy_template
     success "Template files copied"
 
     # Update template placeholders using sed
-    for file in (find "$PROJECT_PATH" -type f -name "*.toml" -o -name "*.md" -o -name "*.py" -o -name "*.rs")
+    for file in (find "$PROJECT_PATH" -type f -not -name ".gitignore")
         if test -f "$file"
             sed -i.bak "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$file"
             sed -i.bak "s/{{AUTHOR_NAME}}/$AUTHOR_NAME/g" "$file"
@@ -210,7 +229,6 @@ function copy_template
             rm "$file.bak"
         end
     end
-
     success "Project files updated"
 end
 
@@ -316,6 +334,7 @@ function initialize_vcs
         case jj
             jj git init $PROJECT_PATH
     end
+    success "$VCS_NAME initialized"
 end
 
 function show_next_steps
