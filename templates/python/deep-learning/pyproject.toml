@@ -4,12 +4,12 @@ description = "A modern deep learning project with PyTorch Lightning"
 version = "0.1.0"
 authors = [{ name = "{{AUTHOR_NAME}}", email = "{{AUTHOR_EMAIL}}" }]
 readme = "README.md"
-license = { text = "MIT" }
+license = { text = "{{LICENSE_NAME}}" }
 requires-python = ">=3.12"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: {{LICENSE_CLASSIFIER}}",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",

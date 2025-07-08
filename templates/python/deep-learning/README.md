@@ -316,7 +316,7 @@ callbacks.append(MyCallback())
 
 ## License
 
-This template is released under the MIT License. See the LICENSE file for details.
+This project is released under the {{LICENSE_NAME}} License. See the LICENSE file for details.
 
 ## Contributing
 

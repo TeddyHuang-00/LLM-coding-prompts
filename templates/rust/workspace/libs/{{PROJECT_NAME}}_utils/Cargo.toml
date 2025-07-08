@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 authors = ["{{AUTHOR_NAME}} <{{AUTHOR_EMAIL}}>"]
 description = "Utility functions for {{PROJECT_NAME}}"
-license = "MIT OR Apache-2.0"
+license = "{{LICENSE_NAME}}"
 repository = "https://github.com/{{GITHUB_NAME}}/{{PROJECT_NAME}}"
 readme = "README.md"
 
