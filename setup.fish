@@ -51,11 +51,60 @@ function success
     gum style --foreground $SUCCESS_COLOR "✅ $argv"
 end
 
+function cache_get -a cache_key
+    set cache_dir .cache
+    set cache_file "$cache_dir/$cache_key"
+    set meta_file "$cache_dir/$cache_key.ttl"
+
+    # Check if cache file exists
+    if not test -f $cache_file
+        echo ""
+        return
+    end
+
+    # Check if meta file exists (contains expiration timestamp)
+    if not test -f $meta_file
+        echo ""
+        return
+    end
+
+    # Read expiration timestamp
+    set expiry_time (cat $meta_file)
+    set current_time (date +%s)
+
+    # Check if cache is expired
+    if test $current_time -gt $expiry_time
+        # Clean up expired cache
+        rm -f $cache_file $meta_file
+        echo ""
+        return
+    end
+
+    # Return cached content
+    cat $cache_file
+end
+
+function cache_set -a cache_key content ttl_seconds
+    set cache_dir .cache
+    set cache_file "$cache_dir/$cache_key"
+    set meta_file "$cache_dir/$cache_key.ttl"
+
+    # Create cache directory if it doesn't exist
+    mkdir -p $cache_dir
+
+    # Save content to cache file
+    echo $content >$cache_file
+
+    # Calculate expiration time and save to meta file
+    set expiry_time (math (date +%s) + $ttl_seconds)
+    echo $expiry_time >$meta_file
+end
+
 function step
     set step_name $argv[1]
     set file_path "scripts/$step_name.fish"
     source $file_path; or begin
-        error "Failed to source step: $step_name"
+        error "Failed at step: $step_name"
         exit 1
     end
 end

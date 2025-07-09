@@ -16,9 +16,16 @@ success "Template files copied"
 # Add selected licenses
 if test -n "$LICENSES"
     for license in $LICENSES
+        set cache_key "license_$license"
+        set license_json (cache_get "$cache_key")
+        if test -z "$license_json"
+            # Fetch license content from an online source (e.g., GitHub)
+            set license_json (gum spin --spinner dot --show-output --title "Fetching $license license" -- curl -s "https://api.github.com/licenses/$license")
+            # Cache for 30 days
+            cache_set "$cache_key" "$license_json" (math '60 * 60 * 24 * 30')
+        end
         set license_file "$PROJECT_PATH/LICENSE-$license"
-        # Fetch license content from an online source (e.g., GitHub)
-        curl -s "https://api.github.com/licenses/$license" | jq -r .body >"$license_file"
+        echo $license_json | jq -r '.body' >"$license_file"
         success "Added $license license"
     end
 end
@@ -87,7 +94,7 @@ else
 end
 
 # Update template placeholders using sed
-for file in (find "$PROJECT_PATH" -type f -not -name ".gitignore")
+for file in (find "$PROJECT_PATH" -type f -not -name ".gitignore" -not -name "LICENSE*" -not -path "*/.jj/*" -not -path "*/.git/*")
     if test -f "$file"
         sed -i.bak "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$file"
         sed -i.bak "s/{{AUTHOR_NAME}}/$AUTHOR_NAME/g" "$file"
@@ -96,7 +103,12 @@ for file in (find "$PROJECT_PATH" -type f -not -name ".gitignore")
         sed -i.bak "s/{{LICENSE_NAME}}/$LICENSE_NAME/g" "$file"
         sed -i.bak "s/{{LICENSE_CLASSIFIER}}/$LICENSE_CLASSIFIER/g" "$file"
         sed -i.bak "s/{{LICENSE_TEXT}}/$LICENSE_TEXT/g" "$file"
-        # Replace license template strings
+        rm "$file.bak"
+    end
+end
+# Replace license template strings
+for file in (find "$PROJECT_PATH" -type f -name "LICENSE*")
+    if test -f "$file"
         sed -i.bak "s/\\[year\\]/$CURRENT_YEAR/g" "$file"
         sed -i.bak "s/\\[yyyy\\]/$CURRENT_YEAR/g" "$file"
         sed -i.bak "s/\\[fullname\\]/$AUTHOR_NAME/g" "$file"

@@ -19,15 +19,25 @@ set sym_conditions 
 set sym_limitations 
 
 function fetch_license_data -a license_key
-    # Fetch license data from GitHub API
-    set license_json (gum spin --spinner dot --show-output --title "Fetching license data" -- curl -s "https://api.github.com/licenses/$license_key")
+    set cache_key "license_$license_key"
+    # Try to get cached license data (cache for 30 days = 2592000 seconds)
+    set license_json (cache_get "$cache_key")
+
+    # Return cached data if available
+    if test -z "$license_json"
+        # Fetch license data from GitHub API
+        set license_json (gum spin --spinner dot --show-output --title "Fetching license data" -- curl -s "https://api.github.com/licenses/$license_key")
+
+        # Cache the fetched data (cache for 30 days)
+        cache_set "$cache_key" "$license_json" (math '60 * 60 * 24 * 30')
+    end
 
     # Parse permissions, conditions, and limitations
     set permissions (echo $license_json | jq -r '.permissions[]?' | tr '\n' ' ' | string trim)
     set conditions (echo $license_json | jq -r '.conditions[]?' | tr '\n' ' ' | string trim)
     set limitations (echo $license_json | jq -r '.limitations[]?' | tr '\n' ' ' | string trim)
 
-    # Return as space-separated values
+    # Return result
     echo "$permissions|$conditions|$limitations"
 end
 
