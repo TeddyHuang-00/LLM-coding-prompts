@@ -57,14 +57,17 @@ cd LLM-coding-prompts
 ./setup.fish
 ```
 
+The setup script is modular and uses individual components in the `scripts/` directory for maintainability and testing.
+
 The setup script will:
 
 - **Guide you through selections**: Language, template, and AI providers
 - **Collect project information**: Name, path, author details, GitHub username
 - **Handle VCS configuration**: Git or Jujutsu support with author setup
+- **License selection**: Choose from MIT, Apache-2.0, or other licenses
 - **Copy and customize templates**: Automatic placeholder replacement
-- **Generate AI prompt files**: Creates provider-specific prompt files
-- **Initialize version control**: Sets up your chosen VCS
+- **Generate AI prompt files**: Creates provider-specific prompt files with language-specific content
+- **Initialize version control**: Sets up your chosen VCS with proper configuration
 
 **Supported AI Providers:**
 
@@ -72,8 +75,9 @@ The setup script will:
 - **Cursor**: `.cursor/rules/*.mdc` files
 - **Gemini CLI**: `GEMINI.md` file
 - **Claude Code**: `CLAUDE.md` file
+- **Multiple providers**: Can select and generate multiple AI prompt files simultaneously
 
-### Manual Setup (Alternative)
+### Manual Setup (Alternative, highly discouraged)
 
 If you prefer manual setup:
 
@@ -221,7 +225,7 @@ This project was inspired by and adopts concepts from:
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Notes
 
