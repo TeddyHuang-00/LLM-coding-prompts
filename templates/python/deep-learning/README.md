@@ -316,7 +316,7 @@ callbacks.append(MyCallback())
 
 ## License
 
-This project is released under the {{LICENSE_NAME}} License. See the LICENSE file for details.
+{{LICENSE_TEXT}}
 
 ## Contributing
 

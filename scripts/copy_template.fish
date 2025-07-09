@@ -1,3 +1,13 @@
+function get_license_file_name -a license
+    switch $license
+        case Unlicense
+            echo Unlicense
+        case '*'
+            set basename (string split -m1 '-' $license)[1]
+            echo "LICENSE-$basename"
+    end
+end
+
 set template_path "$TEMPLATES_DIR/$LANGUAGE/$TEMPLATE"
 
 info "Copying template files..."
@@ -24,8 +34,11 @@ if test -n "$LICENSES"
             # Cache for 30 days
             cache_set "$cache_key" "$license_json" (math '60 * 60 * 24 * 30')
         end
-        set license_file "$PROJECT_PATH/LICENSE-$license"
-        echo $license_json | jq -r '.body' >"$license_file"
+
+        set license_file (get_license_file_name "$license")
+        set license_path "$PROJECT_PATH/$license_file"
+
+        echo $license_json | jq -r '.body' >"$license_path"
         success "Added $license license"
     end
 end
@@ -39,58 +52,55 @@ for dir in (find "$PROJECT_PATH" -type d -name "*{{PROJECT_NAME}}*" | sort -r)
 end
 
 # Generate license-related template variables
-if test -n "$LICENSES"
-    set main_license (echo $LICENSES | cut -d' ' -f1)
+if test -z "$LICENSES"
+    set LICENSES MIT
+end
 
-    # Set license name for templates
-    if test (count $LICENSES) -eq 1
-        set LICENSE_NAME "$main_license"
-    else
-        # Multiple licenses: create combined license string
-        set LICENSE_NAME (string join " OR " $LICENSES)
+set main_license $LICENSES[1]
+
+# Set license name for templates
+set LICENSE_NAME (string join " OR " $LICENSES)
+
+# Set license classifier for Python pyproject.toml (include all licenses)
+set classifier
+for license in $LICENSES
+    switch $license
+        case MIT
+            set -a classifier "MIT License"
+        case Apache-2.0
+            set -a classifier "Apache Software License"
+        case GPL-3.0
+            set -a classifier "GNU General Public License v3 (GPLv3)"
+        case BSD-3-Clause
+            set -a classifier "BSD License"
+        case MPL-2.0
+            set -a classifier "Mozilla Public License 2.0 (MPL 2.0)"
+        case Unlicense
+            set -a classifier "The Unlicense (Unlicense)"
+        case '*'
+            set -a classifier "$license License"
     end
 
-    # Set license classifier for Python pyproject.toml (include all licenses)
-    set LICENSE_CLASSIFIER ""
-    for license in $LICENSES
-        switch $license
-            case MIT
-                set classifier "License :: OSI Approved :: MIT License"
-            case Apache-2.0
-                set classifier "License :: OSI Approved :: Apache Software License"
-            case GPL-3.0
-                set classifier "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
-            case BSD-3-Clause
-                set classifier "License :: OSI Approved :: BSD License"
-            case MPL-2.0
-                set classifier "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
-            case Unlicense
-                set classifier "License :: OSI Approved :: The Unlicense (Unlicense)"
-            case '*'
-                set classifier "License :: OSI Approved :: $license License"
-        end
+end
 
-        if test -z "$LICENSE_CLASSIFIER"
-            set LICENSE_CLASSIFIER "$classifier"
-        else
-            set LICENSE_CLASSIFIER "$LICENSE_CLASSIFIER\",\n    \"$classifier"
-        end
-    end
+set LICENSE_CLASSIFIER
+for cls in $classifier
+    set -a LICENSE_CLASSIFIER "\"License :: OSI Approved :: $cls\","
+end
+set LICENSE_CLASSIFIER (string join "\\n    " $LICENSE_CLASSIFIER)
 
-    # Generate license text for README
-    if test (count $LICENSES) -eq 1
-        set LICENSE_TEXT "This project is licensed under the $main_license License. See the LICENSE-$main_license file for details."
-    else
-        set LICENSE_TEXT "This project is licensed under either of\\n\\n"
-        for license in $LICENSES
-            set LICENSE_TEXT "$LICENSE_TEXT- $license ([LICENSE-$license](LICENSE-$license))\\n"
-        end
-        set LICENSE_TEXT "$LICENSE_TEXT\\nat your option."
-    end
+# Generate license text for README
+if test (count $LICENSES) -eq 1
+    set license_file (get_license_file_name "$main_license")
+    set LICENSE_TEXT "This project is licensed under the $main_license License. See the [$license_file]($license_file) for details."
 else
-    set LICENSE_NAME MIT
-    set LICENSE_CLASSIFIER "License :: OSI Approved :: MIT License"
-    set LICENSE_TEXT "This project is licensed under the MIT License. See the LICENSE file for details."
+    set LICENSE_TEXT "This project is licensed under either of\\n"
+    for license in $LICENSES
+        set license_file (get_license_file_name "$license")
+        set -a LICENSE_TEXT "- $license ([$license_file]($license_file))"
+    end
+    set -a LICENSE_TEXT "\\nat your option."
+    set LICENSE_TEXT (string join "\\n" -- $LICENSE_TEXT)
 end
 
 # Update template placeholders using sed
@@ -101,7 +111,7 @@ for file in (find "$PROJECT_PATH" -type f -not -name ".gitignore" -not -name "LI
         sed -i.bak "s/{{AUTHOR_EMAIL}}/$AUTHOR_EMAIL/g" "$file"
         sed -i.bak "s/{{GITHUB_NAME}}/$GITHUB_NAME/g" "$file"
         sed -i.bak "s/{{LICENSE_NAME}}/$LICENSE_NAME/g" "$file"
-        sed -i.bak "s/{{LICENSE_CLASSIFIER}}/$LICENSE_CLASSIFIER/g" "$file"
+        sed -i.bak "s/\"{{LICENSE_CLASSIFIER}}\",/$LICENSE_CLASSIFIER/g" "$file"
         sed -i.bak "s/{{LICENSE_TEXT}}/$LICENSE_TEXT/g" "$file"
         rm "$file.bak"
     end

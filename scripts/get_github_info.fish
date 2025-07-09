@@ -1,4 +1,4 @@
-set cache_key "github_username"
+set cache_key github_username
 
 # Try to get cached username
 set cached_username (cache_get "$cache_key")

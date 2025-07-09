@@ -89,3 +89,7 @@ This template follows modern Python best practices:
 - **Documentation**: Clear docstrings and comments
 - **Testing**: Comprehensive test coverage
 - **Code quality**: Zero linting warnings and strict type checking
+
+## License
+
+{{LICENSE_TEXT}}
