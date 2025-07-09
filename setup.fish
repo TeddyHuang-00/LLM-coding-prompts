@@ -51,423 +51,39 @@ function success
     gum style --foreground $SUCCESS_COLOR "✅ $argv"
 end
 
-function check_dependencies
-    set missing_deps
-
-    if not type -q gum
-        set -a missing_deps "gum (https://github.com/charmbracelet/gum)"
-    end
-
-    if test (count $missing_deps) -gt 0
-        error "Missing required dependencies:"
-        for dep in $missing_deps
-            echo "  - $dep"
-        end
-        echo ""
-        echo "Please install missing dependencies and try again."
+function step
+    set step_name $argv[1]
+    set file_path "scripts/$step_name.fish"
+    source $file_path; or begin
+        error "Failed to source step: $step_name"
         exit 1
     end
-
-    success "All dependencies found"
-end
-
-function select_language
-    set languages
-    for lang_file in $PROMPTS_SRC_DIR/*.md
-        set lang_name (basename $lang_file .md)
-        if test "$lang_name" != general
-            set -a languages $lang_name
-        end
-    end
-
-    if test (count $languages) -eq 0
-        error "No language files found in $PROMPTS_SRC_DIR"
-        exit 1
-    end
-
-    set LANGUAGE (gum choose $languages --header "Select programming language:")
-    info "Language: $LANGUAGE"
-end
-
-function select_template
-    set template_dir "$TEMPLATES_DIR/$LANGUAGE"
-    if not test -d "$template_dir"
-        error "No templates found for $LANGUAGE"
-        exit 1
-    end
-
-    set templates
-    for template_path in $template_dir/*
-        if test -d "$template_path"
-            set -a templates (basename $template_path)
-        end
-    end
-
-    if test (count $templates) -eq 0
-        error "No templates found in $template_dir"
-        exit 1
-    end
-
-    set TEMPLATE (gum choose $templates --header "Select project template:")
-    info "Template: $TEMPLATE"
-end
-
-function get_project_info
-    set PROJECT_NAME (gum input --placeholder "Enter project name" --prompt "Project name: ")
-    if test -z "$PROJECT_NAME"
-        error "Project name is required"
-        exit 1
-    end
-
-    set PROJECT_PATH (gum input --placeholder "Enter project path (default: current directory)" --prompt "Project path: ")
-    set PROJECT_PATH (string trim $PROJECT_PATH | path normalize)
-    if test -z "$PROJECT_PATH"
-        set PROJECT_PATH "$(pwd)/new_project"
-    end
-
-    if test -d "$PROJECT_PATH"
-        warning "Directory '$PROJECT_PATH' already exists."
-        if not gum confirm "Remove existing directory and create a new one?"
-            error "Directory already exists: $PROJECT_PATH"
-            exit 1
-        end
-    end
-
-    info "Project name: $PROJECT_NAME"
-    info "Project path: $PROJECT_PATH"
-end
-
-function select_licenses
-    set licenses MIT "Apache-2.0" "GPL-3.0" BSD-3-Clause "MPL-2.0" Unlicense
-    set LICENSES (gum choose --ordered --no-limit $licenses --header "Select one or more licenses:")
-    if test -z "$LICENSES"
-        warning "No licenses selected"
-    else
-        info "Selected licenses: $(string join ", " $LICENSES)"
-    end
-end
-
-function select_ai_providers
-    set providers "GitHub Copilot:copilot" "Cursor:cursor" "Gemini CLI:gemini" "Claude Code:claude"
-
-    set selected (gum choose --no-limit $providers --header "Select AI coding assistants:" --label-delimiter ":")
-    if test -z "$selected"
-        warning "No AI providers selected"
-    else
-        set AI_PROVIDERS $selected
-        info "Selected AI providers: $(string join ", " $AI_PROVIDERS)"
-    end
-end
-
-function get_github_info
-    set GITHUB_NAME (gum input --placeholder "Enter your GitHub username" --prompt "GitHub username: ")
-    if test -z "$GITHUB_NAME"
-        error "GitHub username is required"
-        exit 1
-    end
-
-    info "GitHub username: $GITHUB_NAME"
-end
-
-function get_vcs_info
-    set vcs_options "Git:git" "Jujutsu:jj"
-    set VCS_NAME (gum choose $vcs_options --header "Select version control system (VCS):" --label-delimiter ":")
-
-    if not type -q "$VCS_NAME"
-        error "'$VCS_NAME' is not installed or recognized. Please install it or choose another VCS."
-        exit 1
-    end
-
-    switch $VCS_NAME
-        case git
-            set AUTHOR_NAME (git config --global user.name 2>/dev/null; or echo "")
-            set AUTHOR_EMAIL (git config --global user.email 2>/dev/null; or echo "")
-        case jj
-            set AUTHOR_NAME (jj config g user.name 2>/dev/null; or echo "")
-            set AUTHOR_EMAIL (jj config g user.email 2>/dev/null; or echo "")
-    end
-
-    if test -z "$AUTHOR_NAME"
-        warning "No author name configured for $VCS_NAME. Please set it now."
-        set AUTHOR_NAME (gum input --placeholder "Enter your name" --prompt "Author name: ")
-        if test -z "$AUTHOR_NAME"
-            error "Author name is required"
-            exit 1
-        end
-
-        switch $VCS_NAME
-            case git
-                git config --global user.name "$AUTHOR_NAME"
-            case jj
-                jj config s --user user.name "$AUTHOR_NAME"
-        end
-    end
-
-    if test -z "$AUTHOR_EMAIL"
-        warning "No author email configured for $VCS_NAME. Please set it now."
-        set AUTHOR_EMAIL (gum input --placeholder "Enter your email" --prompt "Author email: ")
-        if test -z "$AUTHOR_EMAIL"
-            error "Author email is required"
-            exit 1
-        else if not string match -qr '^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})*$' "$AUTHOR_EMAIL"
-            error "Invalid email format: $AUTHOR_EMAIL"
-            exit 1
-        end
-
-        switch $VCS_NAME
-            case git
-                git config --global user.email "$AUTHOR_EMAIL"
-            case jj
-                jj config s --user user.email "$AUTHOR_EMAIL"
-        end
-    end
-
-    info "VCS: $VCS_NAME"
-    info "Author: $AUTHOR_NAME <$AUTHOR_EMAIL>"
-end
-
-function copy_template
-    set template_path "$TEMPLATES_DIR/$LANGUAGE/$TEMPLATE"
-
-    info "Copying template files..."
-
-    if not test -d "$template_path"
-        error "Template not found: $template_path"
-        exit 1
-    end
-
-    # Copy template files
-    mkdir -p (path dirname "$PROJECT_PATH")
-    rm -rf "$PROJECT_PATH"
-    cp -r "$template_path" "$PROJECT_PATH"
-    success "Template files copied"
-
-    # Add selected licenses
-    if test -n "$LICENSES"
-        for license in $LICENSES
-            set license_file "$PROJECT_PATH/LICENSE-$license"
-            # Fetch license content from an online source (e.g., GitHub)
-            curl -s "https://api.github.com/licenses/$license" | jq -r .body >"$license_file"
-            success "Added $license license"
-        end
-    end
-
-    # Rename directories with template variables (process deepest first)
-    for dir in (find "$PROJECT_PATH" -type d -name "*{{PROJECT_NAME}}*" | sort -r)
-        set new_name (string replace "{{PROJECT_NAME}}" "$PROJECT_NAME" "$dir")
-        if test "$dir" != "$new_name"
-            mv "$dir" "$new_name"
-        end
-    end
-
-    # Generate license-related template variables
-    if test -n "$LICENSES"
-        set main_license (echo $LICENSES | cut -d' ' -f1)
-
-        # Set license name for templates
-        if test (count $LICENSES) -eq 1
-            set LICENSE_NAME "$main_license"
-        else
-            # Multiple licenses: create combined license string
-            set LICENSE_NAME (string join " OR " $LICENSES)
-        end
-
-        # Set license classifier for Python pyproject.toml
-        switch $main_license
-            case MIT
-                set LICENSE_CLASSIFIER "MIT License"
-            case Apache-2.0
-                set LICENSE_CLASSIFIER "Apache Software License"
-            case GPL-3.0
-                set LICENSE_CLASSIFIER "GNU General Public License v3"
-            case BSD-3-Clause
-                set LICENSE_CLASSIFIER "BSD License"
-            case MPL-2.0
-                set LICENSE_CLASSIFIER "Mozilla Public License 2.0"
-            case Unlicense
-                set LICENSE_CLASSIFIER "The Unlicense"
-            case '*'
-                set LICENSE_CLASSIFIER "$main_license License"
-        end
-
-        # Generate license text for README
-        if test (count $LICENSES) -eq 1
-            set LICENSE_TEXT "This project is licensed under the $main_license License. See the LICENSE-$main_license file for details."
-        else
-            set LICENSE_TEXT "This project is licensed under either of\\n\\n"
-            for license in $LICENSES
-                set LICENSE_TEXT "$LICENSE_TEXT- $license ([LICENSE-$license](LICENSE-$license))\\n"
-            end
-            set LICENSE_TEXT "$LICENSE_TEXT\\nat your option."
-        end
-    else
-        set LICENSE_NAME MIT
-        set LICENSE_CLASSIFIER "MIT License"
-        set LICENSE_TEXT "This project is licensed under the MIT License. See the LICENSE file for details."
-    end
-
-    # Update template placeholders using sed
-    for file in (find "$PROJECT_PATH" -type f -not -name ".gitignore")
-        if test -f "$file"
-            sed -i.bak "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$file"
-            sed -i.bak "s/{{AUTHOR_NAME}}/$AUTHOR_NAME/g" "$file"
-            sed -i.bak "s/{{AUTHOR_EMAIL}}/$AUTHOR_EMAIL/g" "$file"
-            sed -i.bak "s/{{GITHUB_NAME}}/$GITHUB_NAME/g" "$file"
-            sed -i.bak "s/{{LICENSE_NAME}}/$LICENSE_NAME/g" "$file"
-            sed -i.bak "s/{{LICENSE_CLASSIFIER}}/$LICENSE_CLASSIFIER/g" "$file"
-            sed -i.bak "s/{{LICENSE_TEXT}}/$LICENSE_TEXT/g" "$file"
-            # Replace license template strings
-            sed -i.bak "s/\\[year\\]/$CURRENT_YEAR/g" "$file"
-            sed -i.bak "s/\\[yyyy\\]/$CURRENT_YEAR/g" "$file"
-            sed -i.bak "s/\\[fullname\\]/$AUTHOR_NAME/g" "$file"
-            sed -i.bak "s/\\[name of copyright owner\\]/$AUTHOR_NAME/g" "$file"
-            rm "$file.bak"
-        end
-    end
-
-    success "Project files updated"
-end
-
-function generate_claude
-    # Create CLAUDE.md with header
-    set file_path "$PROJECT_PATH/CLAUDE.md"
-
-    # Append general rules
-    cat $PROMPTS_SRC_DIR/general.md >>$file_path
-    echo "" >>$file_path
-
-    # Append language-specific rules
-    cat $PROMPTS_SRC_DIR/$LANGUAGE.md >>$file_path
-end
-
-function generate_gemini
-    set file_path "$PROJECT_PATH/GEMINI.md"
-
-    # Append general rules
-    cat $PROMPTS_SRC_DIR/general.md >>$file_path
-    echo "" >>$file_path
-
-    # Append language-specific rules
-    cat $PROMPTS_SRC_DIR/$LANGUAGE.md >>$file_path
-end
-
-function generate_cursor
-    set dir_path "$PROJECT_PATH/.cursor/rules"
-    mkdir -p $dir_path
-    set general_path "$dir_path/general.mdc"
-    set language_path "$dir_path/$LANGUAGE.mdc"
-
-    # Cursor specific conditional application rule
-    set globs
-    switch $LANGUAGE
-        case python
-            set -a globs "*.py" "pyproject.toml"
-        case rust
-            set -a globs "*.rs" "Cargo.toml"
-        case *
-            warning "No specific globs defined for $LANGUAGE, setting to always apply"
-    end
-
-    # Create header for general rules
-    echo --- >>$general_path
-    echo "description: General development rules with modern tooling" >>$general_path
-    echo "alwaysApply: true" >>$general_path
-    echo --- >>$general_path
-    echo "" >>$general_path
-
-    # Append general rules
-    cat $PROMPTS_SRC_DIR/general.md >>$general_path
-
-    # Create header for language-specific rules
-    echo --- >>$language_path
-    echo "description: $LANGUAGE development rules" >>$language_path
-    if test -n "$globs"
-        echo "globs: $(string join "," $globs)" >>$language_path
-        echo "alwaysApply: false" >>$language_path
-    else
-        echo "alwaysApply: true" >>$language_path
-    end
-    echo --- >>$language_path
-    echo "" >>$language_path
-
-    # Append language-specific rules
-    cat $PROMPTS_SRC_DIR/$LANGUAGE.md >>$language_path
-
-end
-
-function generate_copilot
-    set dir_path "$PROJECT_PATH/.github"
-    mkdir -p $dir_path
-    set file_path "$dir_path/copilot-instructions.md"
-
-    # Append general rules
-    cat $PROMPTS_SRC_DIR/general.md >>$file_path
-    echo "" >>$file_path
-
-    # Append language-specific rules
-    cat $PROMPTS_SRC_DIR/$LANGUAGE.md >>$file_path
-end
-
-function generate_ai_prompts
-    for provider in $AI_PROVIDERS
-        switch $provider
-            case copilot
-                generate_copilot
-            case cursor
-                generate_cursor
-            case gemini
-                generate_gemini
-            case claude
-                generate_claude
-        end
-    end
-end
-
-function initialize_vcs
-    switch $VCS_NAME
-        case git
-            git init $PROJECT_PATH
-        case jj
-            jj git init $PROJECT_PATH
-    end
-    success "$VCS_NAME initialized"
-end
-
-function show_next_steps
-    set message
-    set -a message "🎉 Setup Complete!" ""
-    set -a message "Your $LANGUAGE project '$PROJECT_NAME' is ready!" ""
-    set -a message "Next steps:"
-    set -a message "1. Review the generated AI prompt files"
-    set -a message "2. Customize prompts for your specific needs"
-    set -a message "3. Start coding with AI assistance!"
-    banner $message
 end
 
 function main
     banner "🚀 Modern Project Setup" "" "Fish shell + Cat templating + AI prompts"
 
     # Check dependencies
-    check_dependencies
+    step check_dependencies
 
     # Get user preferences
-    select_language
+    step select_language
     if test -z "$LANGUAGE"
         error "Language selection cancelled"
         exit 1
     end
 
-    select_template
+    step select_template
     if test -z "$TEMPLATE"
         error "Template selection cancelled"
         exit 1
     end
 
-    get_project_info
-    get_vcs_info
-    get_github_info
-    select_ai_providers
-    select_licenses
+    step get_project_info
+    step get_vcs_info
+    step get_github_info
+    step select_ai_providers
+    step select_licenses
 
     # Confirm setup
     if not gum confirm "Proceed with setup?"
@@ -476,12 +92,12 @@ function main
     end
 
     # Perform setup
-    copy_template
-    generate_ai_prompts
-    initialize_vcs
+    step copy_template
+    step generate_ai_prompts
+    step initialize_vcs
 
     # Show completion message
-    show_next_steps
+    step show_next_steps
 end
 
 # Run main function
