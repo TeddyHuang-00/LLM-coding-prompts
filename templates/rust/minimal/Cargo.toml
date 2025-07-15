@@ -9,7 +9,7 @@ license = "{{LICENSE_NAME}}"
 repository = "https://github.com/{{GITHUB_NAME}}/{{PROJECT_NAME}}"
 keywords = ["rust", "cli", "example"]
 categories = ["command-line-utilities"]
-rust-version = "1.70"
+rust-version = "1.85"
 
 [dependencies]
 # Error handling (required)
@@ -44,4 +44,3 @@ members = ["."]
 unsafe_code = "forbid"
 unused_import_braces = "warn"
 unused_qualifications = "warn"
-

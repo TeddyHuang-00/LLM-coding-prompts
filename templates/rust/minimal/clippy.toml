@@ -1,16 +1,13 @@
 # Clippy configuration for strict code quality
 avoid-breaking-exported-api = false
-msrv = "1.70"
+msrv = "1.85"
 
 # Security-focused lints
-warn = [
-    "clippy::enum_glob_use",
-    "clippy::pedantic",
-    "clippy::nursery",
-]
+enum_glob_use = "warn"
+pedantic = "warn"
+nursery = "warn"
 
 # Deny security-critical lints
-deny = [
-    "clippy::unwrap_used",
-    "clippy::expect_used",
-]
+unwrap_used = "deny"
+expect_used = "deny"
+

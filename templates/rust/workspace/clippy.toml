@@ -1,24 +1,19 @@
 # Clippy configuration for workspace projects
 avoid-breaking-exported-api = false
-msrv = "1.70"
+msrv = "1.85"
 
 # Comprehensive lints for larger projects
-warn = [
-    "clippy::all",
-    "clippy::pedantic", 
-    "clippy::nursery",
-    "clippy::cargo",
-]
+all = "warn"
+pedantic = "warn"
+nursery = "warn"
+cargo = "warn"
 
 # Security-focused lints
-deny = [
-    "clippy::unwrap_used",
-    "clippy::expect_used",
-]
+unwrap_used = "deny"
+expect_used = "deny"
 
 # Allow some pedantic lints that are too strict for larger projects
-allow = [
-    "clippy::module_name_repetitions",
-    "clippy::missing_errors_doc",
-    "clippy::missing_panics_doc",
-]
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+
